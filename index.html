@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Wisdom - โหราศาสตร์เบื้องต้น & AI พยากรณ์</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Markdown Parser (Marked.js) for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Custom Theme Settings */
+        :root {
+            --bg-deep: #0f172a;
+            --accent-gold: #fbbf24;
+            --text-primary: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .mystic-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Starry Background Animation */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow: hidden;
+        }
+        
+        /* Glass Effect */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Gold Gradient Text */
+        .text-gold {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Navigation Active State */
+        .nav-link.active {
+            color: var(--accent-gold);
+            border-left: 3px solid var(--accent-gold);
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, transparent 100%);
+        }
+
+        /* AI Chat Styles */
+        .ai-response-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        .ai-response-content strong {
+            color: var(--accent-gold);
+        }
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Stars (Canvas) -->
+    <canvas id="starCanvas" class="stars-container"></canvas>
+
+    <!-- Mobile Menu Toggle -->
+    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-2 bg-slate-800 border border-slate-600 rounded-lg text-amber-400 md:hidden shadow-lg">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out glass-panel border-r border-slate-700/50 flex flex-col h-screen">
+            <!-- Logo Area -->
+            <div class="p-6 text-center border-b border-slate-700/50">
+                <div class="inline-block p-3 rounded-full border border-amber-500/30 bg-amber-500/10 mb-3">
+                    <i data-lucide="star" class="w-8 h-8 text-amber-400"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gold tracking-widest uppercase">Astro Wisdom</h1>
+                <p class="text-xs text-slate-400 mt-1 font-light tracking-wide">ศาสตร์แห่งดวงดาว</p>
+            </div>
+
+            <!-- Menu Links -->
+            <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3 custom-scrollbar">
+                <a href="#hero" class="nav-link block px-4 py-3 text-sm font-medium text-slate-300 hover:text-amber-300 rounded-r-lg transition-all">หน้าแรก</a>
+                
+                <!-- New AI Feature Link -->
+                <a href="#ai-oracle" class="nav-link block px-4 py-3 text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-300 hover:to-pink-300 rounded-r-lg transition-all border border-purple-500/30 bg-purple-500/10 mb-2">
+                    ✨ โหราพยากรณ์ AI
+                </a>
+
+                <a href="#zodiac-intro" class="nav-link block px-4 py-3 text-sm font-medium text-slate-300 hover:text-amber-300 rounded-r-lg transition-all">1. ราศีทั้ง 12 (ภาพรวม)</a>
+                <a href="#planet-standards" class="nav-link block px-4 py-3 text-sm font-medium text-slate-300 hover:text-amber-300 rounded-r-lg transition-all">2. มาตรฐานดาว</a>
+                
+                <div class="pt-2 pb-1">
+                    <a href="#zodiac-meanings" class="nav-link block px-4 py-2 text-sm font-bold text-amber-500/80 uppercase tracking-wider">3. ความหมาย 12 ราศี</a>
+                    <div class="ml-4 border-l border-slate-700 pl-2 space-y-1 mt-1">
+                        <a href="#aries" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.1 เมษ</a>
+                        <a href="#taurus" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.2 พฤษภ</a>
+                        <a href="#gemini" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.3 มิถุน</a>
+                        <a href="#cancer" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.4 กรกฎ</a>
+                        <a href="#leo" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.5 สิงห์</a>
+                        <a href="#virgo" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.6 กันย์</a>
+                        <a href="#libra" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.7 ตุลย์</a>
+                        <a href="#scorpio" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.8 พิจิก</a>
+                        <a href="#sagittarius" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.9 ธนู</a>
+                        <a href="#capricorn" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.10 มังกร</a>
+                        <a href="#aquarius" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.11 กุมภ์</a>
+                        <a href="#pisces" class="block px-3 py-1.5 text-xs text-slate-400 hover:text-amber-200 transition">3.12 มีน</a>
+                    </div>
+                </div>
+
+                <a href="#elements" class="nav-link block px-4 py-3 text-sm font-medium text-slate-300 hover:text-amber-300 rounded-r-lg transition-all">4. ธาตุทั้ง 4</a>
+                <a href="#friendly-stars" class="nav-link block px-4 py-3 text-sm font-medium text-slate-300 hover:text-amber-300 rounded-r-lg transition-all">5. ดาวคู่มิตร</a>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-700/50 text-center text-[10px] text-slate-500">
+                &copy; 2025 Astro Wisdom Project
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 h-screen overflow-y-auto scroll-smooth p-6 md:p-12" id="main-scroll">
+            
+            <!-- Hero Section -->
+            <section id="hero" class="min-h-[60vh] flex flex-col justify-center items-center text-center mb-20 relative">
+                <div class="absolute w-64 h-64 bg-amber-500/20 rounded-full blur-[100px] -z-10"></div>
+                <h2 class="text-4xl md:text-6xl font-bold mb-6 text-white leading-tight mystic-font">
+                    เปิดประตูสู่จักรวาล<br><span class="text-gold">แห่งชะตาชีวิต</span>
+                </h2>
+                <p class="text-lg text-slate-300 max-w-2xl font-light leading-relaxed mb-8">
+                    เรียนรู้รากฐานของโหราศาสตร์ เข้าใจความหมายของดวงดาว และค้นพบตัวตนที่ซ่อนอยู่ในจักรราศีของคุณ
+                </p>
+                <a href="#ai-oracle" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full text-white font-bold hover:shadow-lg hover:shadow-purple-500/30 transition transform hover:-translate-y-1">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    คุยกับโหร AI
+                </a>
+            </section>
+
+            <!-- AI Oracle Section (New Feature) -->
+            <section id="ai-oracle" class="mb-24 pt-10 scroll-mt-20">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-purple-500"></div>
+                    <h3 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mystic-font">
+                        ✨ โหราพยากรณ์ AI (Cosmic Oracle)
+                    </h3>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Daily Message Column -->
+                    <div class="glass-panel p-6 rounded-2xl border border-purple-500/30 lg:col-span-1 flex flex-col">
+                        <div class="text-center mb-6">
+                            <div class="inline-block p-3 rounded-full bg-purple-900/50 mb-3">
+                                <i data-lucide="sun" class="w-8 h-8 text-amber-300"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-white mb-2">สารจากจักรวาลรายวัน</h4>
+                            <p class="text-sm text-slate-400">กดปุ่มเพื่อรับคำแนะนำประจำวัน</p>
+                        </div>
+                        
+                        <div id="dailyMessageResult" class="flex-1 min-h-[100px] flex items-center justify-center text-center text-slate-300 italic p-4 bg-slate-900/40 rounded-xl border border-slate-700 mb-6 hidden">
+                            <!-- Daily message will appear here -->
+                        </div>
+
+                        <button onclick="getDailyMessage()" id="dailyBtn" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-white font-medium transition flex justify-center items-center gap-2">
+                            <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+                            รับคำทำนายวันนี้
+                        </button>
+                    </div>
+
+                    <!-- Chat Interface Column -->
+                    <div class="glass-panel p-6 rounded-2xl border border-purple-500/30 lg:col-span-2">
+                        <h4 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="message-circle" class="text-purple-400"></i>
+                            ถามดวงชะตากับ Astro Wisdom
+                        </h4>
+                        
+                        <!-- Chat Form -->
+                        <div class="space-y-4 mb-6">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">ราศีของคุณ (ไม่บังคับ)</label>
+                                <select id="userZodiac" class="w-full bg-slate-900/60 border border-slate-700 text-slate-200 rounded-lg p-3 focus:outline-none focus:border-purple-500">
+                                    <option value="">-- ไม่ระบุ --</option>
+                                    <option value="Aries">เมษ (Aries)</option>
+                                    <option value="Taurus">พฤษภ (Taurus)</option>
+                                    <option value="Gemini">มิถุน (Gemini)</option>
+                                    <option value="Cancer">กรกฎ (Cancer)</option>
+                                    <option value="Leo">สิงห์ (Leo)</option>
+                                    <option value="Virgo">กันย์ (Virgo)</option>
+                                    <option value="Libra">ตุลย์ (Libra)</option>
+                                    <option value="Scorpio">พิจิก (Scorpio)</option>
+                                    <option value="Sagittarius">ธนู (Sagittarius)</option>
+                                    <option value="Capricorn">มังกร (Capricorn)</option>
+                                    <option value="Aquarius">กุมภ์ (Aquarius)</option>
+                                    <option value="Pisces">มีน (Pisces)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">คำถามของคุณ</label>
+                                <textarea id="userQuestion" rows="3" placeholder="เช่น ช่วงนี้การงานเป็นอย่างไร? หรือ ความรักของราศีสิงห์เดือนนี้มีเกณฑ์สมหวังไหม?" class="w-full bg-slate-900/60 border border-slate-700 text-slate-200 rounded-lg p-3 focus:outline-none focus:border-purple-500"></textarea>
+                            </div>
+                            <button onclick="askOracle()" id="askBtn" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl text-white font-bold shadow-lg shadow-purple-900/50 transition flex justify-center items-center gap-2">
+                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                ส่งคำถาม
+                            </button>
+                        </div>
+
+                        <!-- Response Area -->
+                        <div id="oracleResponse" class="hidden">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs uppercase tracking-wide text-purple-400 font-bold">คำทำนาย</span>
+                                <div class="h-px bg-purple-500/30 flex-1"></div>
+                            </div>
+                            <div id="responseText" class="ai-response-content bg-slate-900/40 p-5 rounded-xl border border-purple-500/20 text-slate-200 text-sm leading-relaxed min-h-[100px]">
+                                <!-- AI Response goes here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. Zodiac Intro -->
+            <section id="zodiac-intro" class="mb-24 pt-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-amber-500"></div>
+                    <h3 class="text-3xl font-bold text-white mystic-font">1. ราศีทั้ง 12 (The Zodiac)</h3>
+                </div>
+                <div class="glass-panel p-8 rounded-2xl">
+                    <p class="text-lg leading-relaxed text-slate-300">
+                        จักรราศี (Zodiac) คือแถบสมมติบนท้องฟ้าที่มีความกว้างประมาณ 18 องศา ผ่านเส้นสุริยวิถี โดยแบ่งออกเป็น 12 ส่วนเท่าๆ กัน ส่วนละ 30 องศา เรียกว่า "ราศี" เริ่มต้นที่จุดวิษุวัต (Vernal Equinox) หรือราศีเมษ และวนไปทางทิศตะวันออกจนครบ 12 ราศี เปรียบเสมือนแผนที่เดินทางของดวงดาวที่ส่งผลต่อบุคลิกภาพและชะตาชีวิตของมนุษย์
+                    </p>
+                    
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-4 mt-8 text-center">
+                        <!-- Icons Grid -->
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♈</span><span class="text-xs">เมษ</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♉</span><span class="text-xs">พฤษภ</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♊</span><span class="text-xs">มิถุน</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♋</span><span class="text-xs">กรกฎ</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♌</span><span class="text-xs">สิงห์</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♍</span><span class="text-xs">กันย์</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♎</span><span class="text-xs">ตุลย์</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♏</span><span class="text-xs">พิจิก</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♐</span><span class="text-xs">ธนู</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♑</span><span class="text-xs">มังกร</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♒</span><span class="text-xs">กุมภ์</span></div>
+                        <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-700"><span class="text-2xl block mb-1">♓</span><span class="text-xs">มีน</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Planetary Standards -->
+            <section id="planet-standards" class="mb-24 pt-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-amber-500"></div>
+                    <h3 class="text-3xl font-bold text-white mystic-font">2. มาตรฐานดาว</h3>
+                </div>
+                <p class="text-slate-400 mb-6 font-light">
+                    มาตรฐานดาวบ่งบอกถึง "คุณภาพ" หรือ "ความเข้มแข็ง" ของดาวเคราะห์เมื่อสถิตอยู่ในราศีต่างๆ ซึ่งส่งผลดี-ร้ายแตกต่างกันไป
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- เกษตร -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-emerald-500 hover:bg-slate-800/60 transition">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="shield" class="text-emerald-400 mr-2"></i>
+                            <h4 class="text-xl font-bold text-emerald-400">เกษตร (Domicile)</h4>
+                        </div>
+                        <p class="text-sm text-slate-300">
+                            คือดาวที่เป็นเจ้าเรือน หรือเจ้าของบ้าน มีความมั่นคง ถาวร สม่ำเสมอ เปรียบเสมือนเจ้าของบ้านที่อยู่ในบ้านของตนเอง มีอำนาจจัดการสิ่งต่างๆ ได้เต็มที่
+                        </p>
+                    </div>
+
+                    <!-- อุจจ์ -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-amber-500 hover:bg-slate-800/60 transition">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="crown" class="text-amber-400 mr-2"></i>
+                            <h4 class="text-xl font-bold text-amber-400">อุจจ์ (Exaltation)</h4>
+                        </div>
+                        <p class="text-sm text-slate-300">
+                            คือตำแหน่งที่ดาวมีพลังสูงสุด เจริญรุ่งเรือง โดดเด่น รุนแรง และรวดเร็ว เปรียบเสมือนราชาที่ได้รับชัยชนะ หรือผู้มีบุญบารมีสูง
+                        </p>
+                    </div>
+
+                    <!-- นิจ -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-red-500 hover:bg-slate-800/60 transition">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="trending-down" class="text-red-400 mr-2"></i>
+                            <h4 class="text-xl font-bold text-red-400">นิจ (Fall)</h4>
+                        </div>
+                        <p class="text-sm text-slate-300">
+                            คือตำแหน่งที่ดาวมีกำลังน้อย ต่ำต้อย เสื่อมถอย หรือทำหน้าที่ได้ไม่เต็มที่ เปรียบเสมือนผู้น้อยที่ไร้อำนาจ มักต้องเหนื่อยยากกว่าจะได้มา
+                        </p>
+                    </div>
+
+                    <!-- ประ -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-orange-400 hover:bg-slate-800/60 transition">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="alert-circle" class="text-orange-400 mr-2"></i>
+                            <h4 class="text-xl font-bold text-orange-400">ประ (Detriment)</h4>
+                        </div>
+                        <p class="text-sm text-slate-300">
+                            คือตำแหน่งตรงข้ามกับเกษตร แปลว่า "ของผู้อื่น" ไม่มั่นคง ผันผวน พึ่งพาอาศัยผู้อื่น เปรียบเสมือนเราไปอาศัยบ้านคนอื่นอยู่ ไม่มีความเป็นส่วนตัว
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Zodiac Meanings Detail -->
+            <section id="zodiac-meanings" class="mb-24 pt-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-amber-500"></div>
+                    <h3 class="text-3xl font-bold text-white mystic-font">3. ความหมาย 12 ราศี</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    
+                    <!-- 3.1 Aries -->
+                    <div id="aries" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-red-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.1 เมษ (Aries)</h4>
+                                <span class="text-xs text-red-300">13 เม.ย. - 13 พ.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-red-500 transition duration-500">♈</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-red-500/20 text-red-300 px-2 py-0.5 rounded">ธาตุไฟ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวอังคาร</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                เป็นผู้นำ กล้าหาญ ใจร้อน ตรงไปตรงมา ชอบการแข่งขัน ริเริ่มสิ่งใหม่ๆ เสมอ ไม่ชอบอยู่นิ่ง แต่บางครั้งขาดความรอบคอบ
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.2 Taurus -->
+                    <div id="taurus" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-emerald-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.2 พฤษภ (Taurus)</h4>
+                                <span class="text-xs text-emerald-300">14 พ.ค. - 13 มิ.ย.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-emerald-500 transition duration-500">♉</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">ธาตุดิน</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวศุกร์</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                มั่นคง อดทน รักสวยรักงาม ชอบความสะดวกสบาย ดื้อรั้นแต่จริงใจ เก็บเงินเก่ง ให้ความสำคัญกับความปลอดภัยในชีวิต
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.3 Gemini -->
+                    <div id="gemini" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-yellow-700/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.3 มิถุน (Gemini)</h4>
+                                <span class="text-xs text-yellow-300">14 มิ.ย. - 14 ก.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-yellow-500 transition duration-500">♊</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">ธาตุลม</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวพุธ</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                ช่างเจรจา ปรับตัวเก่ง เรียนรู้เร็ว สองบุคลิก ขี้เบื่อ ชอบการสื่อสาร ข้อมูลข่าวสาร และการเข้าสังคม
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.4 Cancer -->
+                    <div id="cancer" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-cyan-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.4 กรกฎ (Cancer)</h4>
+                                <span class="text-xs text-cyan-300">15 ก.ค. - 16 ส.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-cyan-500 transition duration-500">♋</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded">ธาตุน้ำ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวจันทร์</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                อ่อนโยน รักครอบครัว ขี้สงสาร อารมณ์อ่อนไหวแปรปรวนง่าย ชอบดูแลปกป้องคนรัก ยึดติดกับอดีตและความทรงจำ
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.5 Leo -->
+                    <div id="leo" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-orange-800/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.5 สิงห์ (Leo)</h4>
+                                <span class="text-xs text-orange-300">17 ส.ค. - 16 ก.ย.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-orange-500 transition duration-500">♌</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded">ธาตุไฟ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวอาทิตย์</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                สง่างาม มีความเป็นผู้นำ ใจกว้าง รักเกียรติยศศักดิ์ศรี ชอบเป็นจุดสนใจ เชื่อมั่นในตัวเองสูง บางครั้งดูหยิ่งทะนง
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.6 Virgo -->
+                    <div id="virgo" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-green-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.6 กันย์ (Virgo)</h4>
+                                <span class="text-xs text-green-300">17 ก.ย. - 16 ต.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-green-500 transition duration-500">♍</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-green-500/20 text-green-300 px-2 py-0.5 rounded">ธาตุดิน</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวพุธ</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                ละเอียดรอบคอบ เจ้าระเบียบ ช่างวิเคราะห์วิจารณ์ จิตใจดีชอบช่วยเหลือผู้อื่น รักสุขภาพ ขี้กังวล สมบูรณ์แบบนิยม
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.7 Libra -->
+                    <div id="libra" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-pink-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.7 ตุลย์ (Libra)</h4>
+                                <span class="text-xs text-pink-300">17 ต.ค. - 15 พ.ย.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-pink-500 transition duration-500">♎</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded">ธาตุลม</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวศุกร์</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                รักความยุติธรรม ประนีประนอม มีเสน่ห์ รสนิยมดี เข้าสังคมเก่ง ไม่ชอบความขัดแย้ง ตัดสินใจไม่ค่อยเด็ดขาด
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.8 Scorpio -->
+                    <div id="scorpio" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-purple-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.8 พิจิก (Scorpio)</h4>
+                                <span class="text-xs text-purple-300">16 พ.ย. - 15 ธ.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-purple-500 transition duration-500">♏</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">ธาตุน้ำ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวอังคาร</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                ลึกลับ น่าค้นหา จริงจัง มุ่งมั่น รักแรงเกลียดแรง มีสัมผัสพิเศษ จับผิดเก่ง เก็บความลับเก่ง และมีความอดทนสูง
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.9 Sagittarius -->
+                    <div id="sagittarius" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-indigo-900/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.9 ธนู (Sagittarius)</h4>
+                                <span class="text-xs text-indigo-300">16 ธ.ค. - 13 ม.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-indigo-500 transition duration-500">♐</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">ธาตุไฟ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวพฤหัส</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                มองโลกในแง่ดี รักอิสระ ชอบการเดินทางและการผจญภัย ใฝ่หาความรู้ มีคุณธรรม พูดตรงไปตรงมา จนบางครั้งดูขวานผ่าซาก
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.10 Capricorn -->
+                    <div id="capricorn" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-gray-800/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.10 มังกร (Capricorn)</h4>
+                                <span class="text-xs text-gray-300">14 ม.ค. - 12 ก.พ.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-gray-400 transition duration-500">♑</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-gray-500/20 text-gray-300 px-2 py-0.5 rounded">ธาตุดิน</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวเสาร์</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                มีความทะเยอทะยาน รับผิดชอบสูง อดทน ระมัดระวังตัว วางแผนระยะยาว ประหยัด มักประสบความสำเร็จช้าแต่มั่นคง
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.11 Aquarius -->
+                    <div id="aquarius" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-sky-800/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.11 กุมภ์ (Aquarius)</h4>
+                                <span class="text-xs text-sky-300">13 ก.พ. - 13 มี.ค.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-sky-500 transition duration-500">♒</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded">ธาตุลม</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ราหู</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                มีความคิดสร้างสรรค์ แปลกแหวกแนว รักเพื่อนฝูง ชอบช่วยเหลือสังคม คาดเดายาก รักอิสระทางความคิด ไม่ชอบกฎเกณฑ์
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3.12 Pisces -->
+                    <div id="pisces" class="glass-panel rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300">
+                        <div class="bg-gradient-to-r from-teal-800/80 to-slate-900 p-4 flex justify-between items-center border-b border-white/10">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">3.12 มีน (Pisces)</h4>
+                                <span class="text-xs text-teal-300">14 มี.ค. - 12 เม.ย.</span>
+                            </div>
+                            <span class="text-4xl text-white/20 group-hover:text-teal-500 transition duration-500">♓</span>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex gap-2 text-[10px] uppercase tracking-wide mb-3">
+                                <span class="bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded">ธาตุน้ำ</span>
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">ดาวพฤหัส</span>
+                            </div>
+                            <p class="text-sm text-slate-300">
+                                จินตนาการสูง ขี้สงสาร เสียสละ เข้ากับคนง่าย มีโลกส่วนตัว เชื่อในเรื่องลี้ลับ อารมณ์อ่อนไหว คล้อยตามคนอื่นง่าย
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 4. Elements -->
+            <section id="elements" class="mb-24 pt-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-amber-500"></div>
+                    <h3 class="text-3xl font-bold text-white mystic-font">4. ธาตุทั้ง 4 (The Elements)</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Fire -->
+                    <div class="glass-panel p-6 rounded-xl border-b-4 border-red-600 text-center hover:-translate-y-1 transition">
+                        <div class="w-12 h-12 mx-auto bg-red-900/50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="flame" class="text-red-400"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">ธาตุไฟ</h4>
+                        <p class="text-xs text-slate-400 mb-4 font-mono">เมษ, สิงห์, ธนู</p>
+                        <p class="text-sm text-slate-300">พลังงานสูง กระตือรือร้น เป็นผู้นำ สร้างสรรค์</p>
+                    </div>
+
+                    <!-- Earth -->
+                    <div class="glass-panel p-6 rounded-xl border-b-4 border-emerald-600 text-center hover:-translate-y-1 transition">
+                        <div class="w-12 h-12 mx-auto bg-emerald-900/50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="mountain" class="text-emerald-400"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-emerald-400 mb-2">ธาตุดิน</h4>
+                        <p class="text-xs text-slate-400 mb-4 font-mono">พฤษภ, กันย์, มังกร</p>
+                        <p class="text-sm text-slate-300">มั่นคง หนักแน่น ปฏิบัติจริง อดทน</p>
+                    </div>
+
+                    <!-- Air -->
+                    <div class="glass-panel p-6 rounded-xl border-b-4 border-sky-400 text-center hover:-translate-y-1 transition">
+                        <div class="w-12 h-12 mx-auto bg-sky-900/50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="wind" class="text-sky-300"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-sky-300 mb-2">ธาตุลม</h4>
+                        <p class="text-xs text-slate-400 mb-4 font-mono">มิถุน, ตุลย์, กุมภ์</p>
+                        <p class="text-sm text-slate-300">การสื่อสาร ปัญญา ปรับตัวง่าย คิดวิเคราะห์</p>
+                    </div>
+
+                    <!-- Water -->
+                    <div class="glass-panel p-6 rounded-xl border-b-4 border-blue-600 text-center hover:-translate-y-1 transition">
+                        <div class="w-12 h-12 mx-auto bg-blue-900/50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="waves" class="text-blue-400"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-blue-400 mb-2">ธาตุน้ำ</h4>
+                        <p class="text-xs text-slate-400 mb-4 font-mono">กรกฎ, พิจิก, มีน</p>
+                        <p class="text-sm text-slate-300">อารมณ์ ความรู้สึก ลึกซึ้ง เข้าใจผู้อื่น</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Friendly Planets -->
+            <section id="friendly-stars" class="mb-24 pt-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-0.5 w-12 bg-amber-500"></div>
+                    <h3 class="text-3xl font-bold text-white mystic-font">5. ดาวคู่มิตร (Friendly Pairs)</h3>
+                </div>
+                
+                <div class="glass-panel p-8 rounded-2xl">
+                    <div class="text-center mb-8">
+                        <p class="text-xl font-serif italic text-amber-200/80">
+                            "อาทิตย์เป็นมิตรกับครู จันทร์โฉมตรูพุธนงเยาว์ <br class="hidden md:block">ศุกร์ปากหวานอังคารรับเอา ราหูกับเสาร์เป็นมิตรแก่กัน"
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Pair 1 -->
+                        <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-orange-400">☉</span>
+                                <div class="text-xs mt-1">อาทิตย์ (๑)</div>
+                            </div>
+                            <i data-lucide="heart-handshake" class="text-slate-500"></i>
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-yellow-500">♃</span>
+                                <div class="text-xs mt-1">พฤหัสบดี (๕)</div>
+                            </div>
+                        </div>
+
+                        <!-- Pair 2 -->
+                        <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-yellow-100">☾</span>
+                                <div class="text-xs mt-1">จันทร์ (๒)</div>
+                            </div>
+                            <i data-lucide="heart-handshake" class="text-slate-500"></i>
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-green-400">☿</span>
+                                <div class="text-xs mt-1">พุธ (๔)</div>
+                            </div>
+                        </div>
+
+                        <!-- Pair 3 -->
+                        <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-blue-300">♀</span>
+                                <div class="text-xs mt-1">ศุกร์ (๖)</div>
+                            </div>
+                            <i data-lucide="heart-handshake" class="text-slate-500"></i>
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-red-500">♂</span>
+                                <div class="text-xs mt-1">อังคาร (๓)</div>
+                            </div>
+                        </div>
+
+                        <!-- Pair 4 -->
+                        <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-gray-400">☊</span>
+                                <div class="text-xs mt-1">ราหู (๘)</div>
+                            </div>
+                            <i data-lucide="heart-handshake" class="text-slate-500"></i>
+                            <div class="text-center w-1/3">
+                                <span class="text-3xl text-purple-400">♄</span>
+                                <div class="text-xs mt-1">เสาร์ (๗)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="text-center text-slate-500 text-sm py-10 border-t border-slate-800">
+                <p>&copy; 2025 Astro Wisdom. สงวนลิขสิทธิ์.</p>
+                <p class="text-xs mt-2">ออกแบบด้วยพลังแห่งดวงดาว & Gemini AI</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // API Key for Gemini (Environment provided)
+        const apiKey = ""; 
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 1. Starry Background Animation
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, stars = [];
+
+        function initStars() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            stars = [];
+            const numStars = Math.floor((width * height) / 800);
+
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.5,
+                    opacity: Math.random(),
+                    speed: Math.random() * 0.05 + 0.01
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, width, height);
+            
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.fill();
+                star.opacity += (Math.random() - 0.5) * 0.02;
+                if (star.opacity < 0.1) star.opacity = 0.1;
+                if (star.opacity > 1) star.opacity = 1;
+            });
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', initStars);
+        initStars();
+        animateStars();
+
+        // 2. Mobile Menu Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        let isMenuOpen = false;
+
+        menuBtn.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
+                    isMenuOpen = false;
+                }
+            });
+        });
+
+        // 3. Scroll Spy
+        const mainContent = document.getElementById('main-scroll');
+        const sections = document.querySelectorAll('section');
+
+        mainContent.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (mainContent.scrollTop >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current) && current !== '') {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // 4. Gemini API Integration Logic
+        const systemPrompt = "You are 'Astro Wisdom', an ancient and wise astrologer AI. You speak Thai. Your tone is mystical, supportive, and knowledgeable. You provide insights based on Western astrology principles but adapted for Thai context if needed. Keep answers concise but profound. Use formatting like bold for key terms.";
+
+        async function callGemini(userPrompt) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error('Error:', error);
+                return "ขออภัย ดวงดาวกำลังโคจรในตำแหน่งที่สื่อสารยากลำบาก โปรดลองใหม่อีกครั้งในภายหลัง";
+            }
+        }
+
+        // Feature: Ask the Oracle
+        async function askOracle() {
+            const zodiac = document.getElementById('userZodiac').value;
+            const question = document.getElementById('userQuestion').value;
+            const responseDiv = document.getElementById('oracleResponse');
+            const responseTextDiv = document.getElementById('responseText');
+            const btn = document.getElementById('askBtn');
+
+            if (!question.trim()) {
+                alert('โปรดระบุคำถามของท่านต่อดวงดาว');
+                return;
+            }
+
+            // UI Loading State
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-dots">กำลังสื่อสารกับจักรวาล</span>';
+            responseDiv.classList.remove('hidden');
+            responseTextDiv.innerHTML = '<div class="text-center text-purple-300 animate-pulse">กำลังอ่านดวงดาว...</div>';
+
+            // Construct Prompt
+            let finalPrompt = `คำถามจากผู้ใช้: "${question}"`;
+            if (zodiac) {
+                finalPrompt += ` (ราศีของผู้ถาม: ${zodiac})`;
+            }
+
+            // Call API
+            const answer = await callGemini(finalPrompt);
+
+            // UI Render State
+            responseTextDiv.innerHTML = marked.parse(answer);
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="sparkles" class="w-5 h-5"></i> ส่งคำถาม';
+            lucide.createIcons(); // Re-init icons if needed
+        }
+
+        // Feature: Daily Message
+        async function getDailyMessage() {
+            const resultDiv = document.getElementById('dailyMessageResult');
+            const btn = document.getElementById('dailyBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-dots">กำลังรับสาร</span>';
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '...';
+
+            // Random "Astrological Weather" context to make it feel dynamic
+            const aspects = ["Sun trine Moon", "Mercury retrograde", "Venus entering Libra", "Full Moon energy", "Mars square Saturn"];
+            const randomAspect = aspects[Math.floor(Math.random() * aspects.length)];
+            
+            const prompt = `Give me a short, one-sentence daily cosmic guidance or affirmation for today. Current vibe: ${randomAspect}. Output in Thai only.`;
+            
+            const answer = await callGemini(prompt);
+
+            resultDiv.innerHTML = `"${answer.trim()}"`;
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="message-square-plus" class="w-4 h-4"></i> รับคำทำนายวันนี้';
+            lucide.createIcons();
+        }
+
+    </script>
+</body>
+</html>
